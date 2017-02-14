@@ -115,6 +115,7 @@ thread_start (void)
 
   /* Wait for the idle thread to initialize idle_thread. */
   sema_down (&idle_started);
+   
 }
 
 /* Called by the timer interrupt handler at each timer tick.
@@ -257,7 +258,7 @@ thread_name (void)
 struct thread *
 thread_current (void) 
 {
-  struct thread *t = running_thread ();
+  struct thread *t = running_thread();
   
   /* Make sure T is really a thread.
      If either of these assertions fire, then your thread may
@@ -291,11 +292,11 @@ thread_exit (void)
   /* Remove thread from all threads list, set our status to dying,
      and schedule another process.  That process will destroy us
      when it calls thread_schedule_tail(). */
-  intr_disable ();
+  intr_disable();
   list_remove (&thread_current()->allelem);
-  thread_current ()->status = THREAD_DYING;
-  schedule ();
-  NOT_REACHED ();
+  thread_current()->status = THREAD_DYING;
+  schedule();
+  NOT_REACHED();
 }
 
 /* Yields the CPU.  The current thread is not put to sleep and
@@ -465,6 +466,10 @@ init_thread (struct thread *t, const char *name, int priority)
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
   t->magic = THREAD_MAGIC;
+  
+  //our code
+  sema_init(t->threadSema, 1);
+  t->targetTime = 0; 
 
   old_level = intr_disable();
   list_push_back (&all_list, &t->allelem);

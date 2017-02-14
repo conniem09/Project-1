@@ -94,6 +94,11 @@ struct thread
 
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
+    
+    /* things we added */
+    struct list_elem blockedelem;       /* blockedlist element. */   
+    struct semaphore* threadSema;       /* thread blocker */
+    int64_t targetTime;                 /* time to wake up */
 
 #ifdef USERPROG
     /* Owned by userprog/process.c. */

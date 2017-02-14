@@ -31,18 +31,8 @@ static bool too_many_loops(unsigned loops);
 static void busy_wait(int64_t loops);
 static void real_time_sleep(int64_t num, int32_t denom);
 static void real_time_delay(int64_t num, int32_t denom);
-
-//struct that we made to hold thread and time info
-struct block_thread_element {
-	//provided list elem
-	struct list_elem elem;
-	//provided thread
-	struct semaphore* threadSema;
-	int64_t targetTime;	
-} block_thread_element;
-
 //global list lock
-  struct semaphore* mutex = NULL; 
+  struct semaphore mutex; 
 
 /* Sets up the timer to interrupt TIMER_FREQ times per second,
    and registers the corresponding interrupt. */
@@ -52,8 +42,7 @@ timer_init(void)
   pit_configure_channel(0, 2, TIMER_FREQ);
   intr_register_ext(0x20, timer_interrupt, "8254 Timer");
   list_init(&blocked);
-  mutex = (struct semaphore*) malloc(sizeof(struct semaphore*));
-  sema_init(mutex, 1);
+  sema_init(&mutex, 1);
 }
 
 /* Calibrates loops_per_tick, used to implement brief delays. */
@@ -107,30 +96,31 @@ void
 timer_sleep(int64_t ticks) 
 {
   //int64_t start = timer_ticks();
-  struct block_thread_element* threadNode = 
-	(struct block_thread_element*) malloc(sizeof(int64_t) + 
-	sizeof(struct thread*)); // TODO: This malloc is broken
+  
+  //get current thread
+  struct thread* t = thread_current();
+
   //declare semaphore
-  struct semaphore* blockSema = (struct semaphore*) malloc(sizeof(struct semaphore*)); 
-  sema_init(blockSema, 1);
+
   
   ASSERT(intr_get_level() == INTR_ON);
   //put sempahore and dest time in struct
-	threadNode->threadSema = blockSema;	
-	threadNode->targetTime = ticks + timer_ticks();
+	t->targetTime = ticks + timer_ticks();
   //aquire lock
-  sema_down(mutex);
-  //add struct to blocked list
-  list_push_back (&blocked, &(threadNode->elem));
+  sema_down(&mutex);
+  //add thread to blocked list 
+  list_push_back(&blocked, &(t->blockedelem));
   //release lock
-  sema_up(mutex);
+  sema_up(&mutex);
   //block using semaphore
-  sema_down(blockSema);
-  
-  //free memory
-  free(threadNode);
-  free(blockSema);
-
+  sema_down(t->threadSema);
+  //remove ourself from the blocked list
+  //aquire lock
+  sema_down(&mutex);
+  //remove ourself
+  list_remove(&(t->blockedelem));
+  //release lock
+  sema_up(&mutex);
   //while (timer_elapsed(start) < ticks) 
   //  thread_yield();
 }
@@ -209,22 +199,18 @@ timer_print_stats(void)
 static void
 timer_interrupt(struct intr_frame *args UNUSED)
 {
-  struct semaphore* temp = NULL;
   struct list_elem *i;
+   struct thread *t;
   ticks++;
   thread_tick();
   //look through list
   //for loop adapted from thread.c thread_foreach function
   for (i = list_begin(&blocked); i != list_end(&blocked); i = list_next(i)){
+      t = list_entry (i, struct thread, blockedelem);
 	  //find expired time
-	  if(list_entry(i, struct block_thread_element, elem)-> targetTime <= timer_ticks()){
-		//set temp
-		temp = list_entry(i, struct block_thread_element, elem)-> threadSema;
-		//remove from list
-		list_remove(i);
+	  if(t-> targetTime <= timer_ticks())
 		//call up on time 
-		sema_up(temp);
-	}
+		sema_up(t->threadSema);
   }
   
  
