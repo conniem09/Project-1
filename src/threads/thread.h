@@ -4,6 +4,7 @@
 #include <debug.h>
 #include <list.h>
 #include <stdint.h>
+#include "threads/synch.h"
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -97,7 +98,7 @@ struct thread
     
     /* things we added */
     struct list_elem blockedelem;       /* blockedlist element. */   
-    struct semaphore* threadSema;       /* thread blocker */
+    struct semaphore threadSema;        /* thread blocker */
     int64_t targetTime;                 /* time to wake up */
 
 #ifdef USERPROG

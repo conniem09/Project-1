@@ -468,7 +468,7 @@ init_thread (struct thread *t, const char *name, int priority)
   t->magic = THREAD_MAGIC;
   
   //our code
-  sema_init(t->threadSema, 1);
+  sema_init(&t->threadSema, 1);
   t->targetTime = 0; 
 
   old_level = intr_disable();

@@ -113,7 +113,7 @@ timer_sleep(int64_t ticks)
   //release lock
   sema_up(&mutex);
   //block using semaphore
-  sema_down(t->threadSema);
+  sema_down(&t->threadSema);
   //remove ourself from the blocked list
   //aquire lock
   sema_down(&mutex);
@@ -200,7 +200,7 @@ static void
 timer_interrupt(struct intr_frame *args UNUSED)
 {
   struct list_elem *i;
-   struct thread *t;
+  struct thread *t;
   ticks++;
   thread_tick();
   //look through list
@@ -208,9 +208,9 @@ timer_interrupt(struct intr_frame *args UNUSED)
   for (i = list_begin(&blocked); i != list_end(&blocked); i = list_next(i)){
       t = list_entry (i, struct thread, blockedelem);
 	  //find expired time
-	  if(t-> targetTime <= timer_ticks())
+	  if(t-> targetTime <= ticks)
 		//call up on time 
-		sema_up(t->threadSema);
+		sema_up(&t->threadSema);
   }
   
  
