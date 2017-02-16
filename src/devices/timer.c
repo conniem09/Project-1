@@ -205,6 +205,7 @@ timer_interrupt(struct intr_frame *args UNUSED)
   thread_tick();
   //look through list
   //for loop adapted from thread.c thread_foreach function
+  //sema_down(&mutex);
   for (i = list_begin(&blocked); i != list_end(&blocked); i = list_next(i)){
       t = list_entry (i, struct thread, blockedelem);
 	  //find expired time
@@ -212,7 +213,7 @@ timer_interrupt(struct intr_frame *args UNUSED)
 		//call up on time 
 		sema_up(&t->threadSema);
   }
-  
+  //sema_up(&mutex);
  
 }
 
