@@ -105,24 +105,19 @@ timer_sleep(int64_t ticks)
   
   ASSERT(intr_get_level() == INTR_ON);
   //put sempahore and dest time in struct
-	t->targetTime = ticks + timer_ticks();
-  //aquire lock
-  sema_down(&mutex);
+  t->targetTime = ticks + timer_ticks();
+  //Protect list by disabling interrupts
   //add thread to blocked list 
+  intr_disable();
   list_push_back(&blocked, &(t->blockedelem));
-  //release lock
-  sema_up(&mutex);
+  //Finished modifying list. Reenable interrupts
+  intr_enable();
   //block using semaphore
   sema_down(&t->threadSema);
   //remove ourself from the blocked list
-  //aquire lock
-  sema_down(&mutex);
-  //remove ourself
-  list_remove(&(t->blockedelem));
-  //release lock
-  sema_up(&mutex);
-  //while (timer_elapsed(start) < ticks) 
-  //  thread_yield();
+  //intr_disable();
+  //list_remove(&(t->blockedelem));
+  //intr_enable();
 }
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
@@ -209,11 +204,14 @@ timer_interrupt(struct intr_frame *args UNUSED)
   for (i = list_begin(&blocked); i != list_end(&blocked); i = list_next(i)){
       t = list_entry (i, struct thread, blockedelem);
 	  //find expired time
-	  if(t-> targetTime <= ticks)
-		//call up on time 
-		sema_up(&t->threadSema);
+	  if(t-> targetTime <= ticks) {
+		  		//call up on time 
+		sema_up(&t->threadSema);	
+		list_remove(&(t->blockedelem));   // ????
+	  }
+
   }
-  //sema_up(&mutex);
+	  //sema_up(&mutex);
  
 }
 
