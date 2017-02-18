@@ -362,6 +362,11 @@ void
 thread_set_priority (int new_priority) 
 {
   thread_current ()->priority = new_priority;
+  if(lessUsingPriority(list_begin(&ready_list),&running_thread()->elem, NULL)){
+	 if(intr_get_level() == INTR_ON){
+		thread_yield();
+	 }
+  }
 }
 
 /* Returns the current thread's priority. */
