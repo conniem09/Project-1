@@ -245,17 +245,19 @@ thread_unblock (struct thread *t)
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
   //list_push_back (&ready_list, &t->elem);  // Insert sorted
-  list_insert_ordered(&ready_list,&t->elem,&lessUsingPriority,&t->priority);
+  list_insert_ordered(&ready_list,&t->elem,&lessUsingPriority,NULL);
   t->status = THREAD_READY;
   intr_set_level (old_level);
   if(lessUsingPriority(list_begin(&ready_list),&running_thread()->elem, NULL)){
 	 if(intr_get_level() == INTR_ON){
 		thread_yield();
-	}
+	}//else 
+		//intr_yield_on_return();
+	
   }
 }
 
-//returns true if old is less than new
+/* Returns true if old is greater than new */
 bool lessUsingPriority(const struct list_elem *new, const struct list_elem *old,
                        void *aux UNUSED){
   return list_entry (old, struct thread, elem) -> priority 
@@ -331,7 +333,8 @@ thread_yield (void)
 
   old_level = intr_disable ();
   if (cur != idle_thread) 
-    list_push_back (&ready_list, &cur->elem);
+    //list_push_back (&ready_list, &cur->elem);
+    list_insert_ordered(&ready_list,&cur->elem,&lessUsingPriority,NULL);
   cur->status = THREAD_READY;
   schedule ();
   intr_set_level (old_level);
