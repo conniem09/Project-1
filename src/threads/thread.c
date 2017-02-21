@@ -70,9 +70,6 @@ static void *alloc_frame (struct thread *, size_t size);
 static void schedule (void);
 void thread_schedule_tail (struct thread *prev);
 static tid_t allocate_tid (void);
-bool lessUsingPriority(const struct list_elem *a,
-                             const struct list_elem *b,
-                             void *aux);
 
 /* Initializes the threading system by transforming the code
    that's currently running into a thread.  This can't work in
@@ -205,6 +202,7 @@ thread_create (const char *name, int priority,
 
   /* Add to run queue. */
   thread_unblock (t);
+  checkYield();
 
   return tid;
 }
@@ -248,13 +246,6 @@ thread_unblock (struct thread *t)
   list_insert_ordered(&ready_list,&t->elem,&lessUsingPriority,NULL);
   t->status = THREAD_READY;
   intr_set_level (old_level);
-  if(lessUsingPriority(list_begin(&ready_list),&running_thread()->elem, NULL)){
-	 if(intr_get_level() == INTR_ON){
-		thread_yield();
-	}//else 
-		//intr_yield_on_return();
-	
-  }
 }
 
 /* Returns true if old is greater than new */
@@ -340,6 +331,15 @@ thread_yield (void)
   intr_set_level (old_level);
 }
 
+//check if we need to yield to to the next thread in the list
+void checkYield(){
+	 if(!intr_context()){
+		thread_yield();
+	 } else {
+		intr_yield_on_return();
+	 }
+}
+
 /* Invoke function 'func' on all threads, passing along 'aux'.
    This function must be called with interrupts off. */
 void
@@ -363,9 +363,7 @@ thread_set_priority (int new_priority)
 {
   thread_current ()->priority = new_priority;
   if(lessUsingPriority(list_begin(&ready_list),&running_thread()->elem, NULL)){
-	 if(intr_get_level() == INTR_ON){
-		thread_yield();
-	 }
+	  checkYield();
   }
 }
 

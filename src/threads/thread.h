@@ -124,6 +124,7 @@ void thread_print_stats (void);
 typedef void thread_func (void *aux);
 tid_t thread_create (const char *name, int priority, thread_func *, void *);
 
+
 void thread_block (void);
 void thread_unblock (struct thread *);
 
@@ -146,4 +147,8 @@ void thread_set_nice (int);
 int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
 
+//our helper functions
+bool lessUsingPriority(const struct list_elem *new, const struct list_elem *old,
+                       void *aux UNUSED);
+void checkYield();
 #endif /* threads/thread.h */
