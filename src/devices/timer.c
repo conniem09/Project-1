@@ -207,11 +207,10 @@ timer_interrupt(struct intr_frame *args UNUSED)
 	  if(t-> targetTime <= ticks) {
 		  		//call up on time 
 		sema_up(&t->threadSema);	
-		list_remove(&(t->blockedelem));   // ????
+		list_remove(&(t->blockedelem));
 	  }
 
   }
-	  //sema_up(&mutex);
  
 }
 
