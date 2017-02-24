@@ -105,7 +105,7 @@ timer_sleep(int64_t ticks)
     //Protect list and thread by disabling interrupts, 
     //add targetTime to thread, add thread to blocked list 
     old_level = intr_disable();
-    //put sempahore and dest time in struct
+    //put dest time in struct
     t->targetTime = ticks + timer_ticks();
     list_push_back(&blocked, &(t->blockedelem));
     intr_set_level(old_level);
