@@ -360,6 +360,10 @@ thread_foreach(thread_action_func *func, void *aux)
 void
 thread_set_priority(int new_priority) 
 {
+    enum intr_level old_level;
+    bool possibleYield;
+
+    old_level = intr_disable();
     if (thread_current()-> donor != NULL){
         if (thread_current()->priority < new_priority) {
             thread_current()->priority = new_priority;
@@ -369,7 +373,9 @@ thread_set_priority(int new_priority)
     } else if (new_priority >=0) {
         thread_current()->priority = new_priority;
     }
-    if (lessUsingPriority(list_begin(&ready_list), &running_thread()->elem, NULL)){
+    possibleYield = lessUsingPriority(list_begin(&ready_list), &running_thread()->elem, NULL);
+    intr_set_level(old_level);
+    if (possibleYield){
         checkYield();
     }
 }
