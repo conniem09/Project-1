@@ -32,6 +32,7 @@
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 
+void donate(struct thread* receiver, struct thread* donor);
 bool lessUsingPrioritySema(const struct list_elem *new, const struct list_elem 
 							*old, void *aux UNUSED);
 
@@ -71,7 +72,6 @@ sema_down (struct semaphore *sema)
   old_level = intr_disable ();
   while (sema->value == 0) 
     {
-      //list_push_back (&sema->waiters, &thread_current ()->elem);
       list_insert_ordered(&sema->waiters, &thread_current ()->elem, 
 							&lessUsingPriority, NULL);
       thread_block ();
@@ -203,9 +203,30 @@ lock_acquire (struct lock *lock)
   ASSERT (lock != NULL);
   ASSERT (!intr_context ());
   ASSERT (!lock_held_by_current_thread (lock));
-
+  
+  //check if lock is held by another thread of lower priority
+  //then we need to donate else we aquire as normal 
+  if(lock->holder!= NULL){
+    //donate(holder, curent priority)
+    donate(lock->holder, thread_current());
+   }
   sema_down (&lock->semaphore);
   lock->holder = thread_current ();
+}
+
+void donate(struct thread* receiver, struct thread* donor){
+   //save the old priority 
+   receiver->startingPriority = receiver->priority;
+   //set new priority
+   receiver->priority =  donor->priority;
+   //add to our list of donors 
+   //list_push_back(&receiver->donors, donor);
+   //concatinate donor list to ours
+   //check if need to yield 
+   //if(lessUsingPriority(list_begin(&ready_list), &running_thread()->elem, NULL)){
+	 // checkYield();
+  //}
+   
 }
 
 /* Tries to acquires LOCK and returns true if successful or false
@@ -240,6 +261,9 @@ lock_release (struct lock *lock)
   ASSERT (lock_held_by_current_thread (lock));
 
   lock->holder = NULL;
+   //reset
+   thread_set_priority(thread_current()->startingPriority);
+   thread_current()->startingPriority = -1;
   sema_up (&lock->semaphore);
 }
 
@@ -305,7 +329,6 @@ cond_wait (struct condition *cond, struct lock *lock)
   
   sema_init (&waiter.semaphore, 0);
   waiter.priority = thread_current()->priority;
-  //list_push_back (&cond->waiters, &waiter.elem);
   list_insert_ordered(&cond->waiters, &waiter.elem, &lessUsingPrioritySema, 
 						NULL);
   lock_release (lock);

@@ -100,6 +100,7 @@ struct thread
     struct list_elem blockedelem;       /* blockedlist element. */   
     struct semaphore threadSema;        /* thread blocker */
     int64_t targetTime;                 /* time to wake up */
+    int startingPriority;               /* priority before donation*/
 
 #ifdef USERPROG
     /* Owned by userprog/process.c. */

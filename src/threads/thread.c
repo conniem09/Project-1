@@ -235,7 +235,7 @@ thread_block (void)
 void
 thread_unblock (struct thread *t) 
 {
-	void *aux=NULL; //temp
+	void *aux = NULL; //temp
   enum intr_level old_level;
 
   ASSERT (is_thread (t));
@@ -243,7 +243,7 @@ thread_unblock (struct thread *t)
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
   //list_push_back (&ready_list, &t->elem);  // Insert sorted
-  list_insert_ordered(&ready_list,&t->elem,&lessUsingPriority,NULL);
+  list_insert_ordered(&ready_list, &t->elem, &lessUsingPriority, NULL);
   t->status = THREAD_READY;
   intr_set_level (old_level);
 }
@@ -251,8 +251,8 @@ thread_unblock (struct thread *t)
 /* Returns true if old is greater than new */
 bool lessUsingPriority(const struct list_elem *new, const struct list_elem *old,
                        void *aux UNUSED){
-  return list_entry (old, struct thread, elem) -> priority 
-  < list_entry (new, struct thread, elem) -> priority;
+  return list_entry (old, struct thread, elem)->priority 
+  < list_entry (new, struct thread, elem)->priority;
 }
 
 
@@ -325,7 +325,7 @@ thread_yield (void)
   old_level = intr_disable ();
   if (cur != idle_thread) 
     //list_push_back (&ready_list, &cur->elem);
-    list_insert_ordered(&ready_list,&cur->elem,&lessUsingPriority,NULL);
+    list_insert_ordered (&ready_list, &cur->elem, &lessUsingPriority, NULL);
   cur->status = THREAD_READY;
   schedule ();
   intr_set_level (old_level);
@@ -349,8 +349,8 @@ thread_foreach (thread_action_func *func, void *aux)
 
   ASSERT (intr_get_level () == INTR_OFF);
 
-  for (e = list_begin (&all_list); e != list_end (&all_list);
-       e = list_next (e))
+  for (e = list_begin(&all_list); e != list_end(&all_list);
+       e = list_next(e))
     {
       struct thread *t = list_entry (e, struct thread, allelem);
       func (t, aux);
@@ -361,8 +361,10 @@ thread_foreach (thread_action_func *func, void *aux)
 void
 thread_set_priority (int new_priority) 
 {
-  thread_current ()->priority = new_priority;
-  if(lessUsingPriority(list_begin(&ready_list),&running_thread()->elem, NULL)){
+  if(new_priority > -1){
+    thread_current ()->priority = new_priority;
+  }
+  if(lessUsingPriority(list_begin(&ready_list), &running_thread()->elem, NULL)){
 	  checkYield();
   }
 }
@@ -496,6 +498,7 @@ init_thread (struct thread *t, const char *name, int priority)
   //our code
   sema_init(&t->threadSema, 0);
   t->targetTime = 0; 
+  t->startingPriority = -1;
 
   old_level = intr_disable();
   list_push_back (&all_list, &t->allelem);
