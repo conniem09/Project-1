@@ -32,7 +32,7 @@
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 
-void donate(struct thread* receiver, struct thread* donor);
+int donate(struct thread* receiver, struct thread* donor);
 bool lessUsingPrioritySema(const struct list_elem *new, const struct list_elem 
 							*old, void *aux UNUSED);
 
@@ -199,26 +199,37 @@ lock_init (struct lock *lock)
    we need to sleep. */
 void
 lock_acquire (struct lock *lock)
-{
+{ 
+  int receiverOldPriority;
+  struct thread *receiver = lock->holder;
+  
   ASSERT (lock != NULL);
   ASSERT (!intr_context ());
   ASSERT (!lock_held_by_current_thread (lock));
   
   //check if lock is held by another thread of lower priority
   //then we need to donate else we aquire as normal 
-  if(lock->holder!= NULL){
-    //donate(holder, curent priority)
-    donate(lock->holder, thread_current());
+  if(receiver != NULL){
+    //donate(holder, current priority)
+    receiverOldPriority = donate(receiver, thread_current());
    }
   sema_down (&lock->semaphore);
+  //reset
+  if(receiver != NULL){
+   receiver->priority = receiverOldPriority;
+   }
+  
   lock->holder = thread_current ();
 }
 
-void donate(struct thread* receiver, struct thread* donor){
+int donate(struct thread* receiver, struct thread* donor){
+   
+   int receiverOldPriority = receiver->priority;
+   
    //save the old priority 
-   receiver->startingPriority = receiver->priority;
+   
    //set new priority
-   receiver->priority =  donor->priority;
+   receiver->priority = donor->priority;
    //add to our list of donors 
    //list_push_back(&receiver->donors, donor);
    //concatinate donor list to ours
@@ -226,6 +237,7 @@ void donate(struct thread* receiver, struct thread* donor){
    //if(lessUsingPriority(list_begin(&ready_list), &running_thread()->elem, NULL)){
 	 // checkYield();
   //}
+  return receiverOldPriority;
    
 }
 
@@ -261,10 +273,10 @@ lock_release (struct lock *lock)
   ASSERT (lock_held_by_current_thread (lock));
 
   lock->holder = NULL;
-   //reset
-   thread_set_priority(thread_current()->startingPriority);
-   thread_current()->startingPriority = -1;
+   
   sema_up (&lock->semaphore);
+
+  checkYield();
 }
 
 /* Returns true if the current thread holds LOCK, false
