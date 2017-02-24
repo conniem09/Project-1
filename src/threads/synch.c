@@ -213,7 +213,6 @@ lock_acquire(struct lock *lock)
     // check if lock is held by another thread of lower priority
     // then we need to donate else we aquire as normal 
     if (receiver != NULL) {
-        //donate(holder, current priority)
         receiverOldPriority = donate(receiver, thread_current());
     }
     sema_down(&lock->semaphore);
