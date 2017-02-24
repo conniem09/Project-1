@@ -1,3 +1,10 @@
+/* Student Information
+ * Chia-Hua Lu              Sabrina Herrero             Connie Chen
+ * CL38755                  SH44786                     CMC5837
+ * thegoldflute@gmail.com   sabrinaherrero123@gmail.com conniem09@gmail.com
+ * 52075                    52105                       52105
+ */
+
 /*  This file is derived from source code for the Nachos
     instructional operating system.  The Nachos copyright notice
     is reproduced in full below. */
