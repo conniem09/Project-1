@@ -205,18 +205,21 @@ lock_acquire(struct lock *lock)
 { 
     int receiverOldPriority;
     struct thread *receiver = lock->holder;
+    enum intr_level old_level;
   
     ASSERT(lock != NULL);
     ASSERT(!intr_context());
     ASSERT(!lock_held_by_current_thread(lock));
-  
+    old_level = intr_disable();
     // check if lock is held by another thread of lower priority
     // then we need to donate else we aquire as normal 
     if (receiver != NULL) {
         receiverOldPriority = donate(receiver, thread_current());
     }
+    intr_set_level(old_level);
     sema_down(&lock->semaphore);
     // reset
+    old_level = intr_disable();
     if (receiver != NULL) {
         receiver->priority = receiverOldPriority;
     if (receiver->startingPriority>-1) {
@@ -225,6 +228,7 @@ lock_acquire(struct lock *lock)
         receiver->donor = NULL;
     }
     lock->holder = thread_current();
+    intr_set_level(old_level);
 }
 
 int 

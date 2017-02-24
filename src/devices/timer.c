@@ -98,14 +98,17 @@ void
 timer_sleep(int64_t ticks) 
 {
     //get current thread
-    struct thread* t = thread_current();  
+    struct thread* t = thread_current();
+    enum intr_level old_level;  
     ASSERT(intr_get_level() == INTR_ON);
+    
+    //Protect list and thread by disabling interrupts, 
+    //add targetTime to thread, add thread to blocked list 
+    old_level = intr_disable();
     //put sempahore and dest time in struct
     t->targetTime = ticks + timer_ticks();
-    //Protect list by disabling interrupts, add thread to blocked list 
-    intr_disable();
     list_push_back(&blocked, &(t->blockedelem));
-    intr_enable();
+    intr_set_level(old_level);
     //block using semaphore
     sema_down(&t->threadSema);
 }
