@@ -229,6 +229,7 @@ int donate(struct thread* receiver, struct thread* donor){
    //save the old priority 
    
    //set new priority
+   if (receiver->priority < donor->priority)
    receiver->priority = donor->priority;
    //add to our list of donors 
    //list_push_back(&receiver->donors, donor);
