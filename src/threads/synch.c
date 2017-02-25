@@ -41,7 +41,7 @@
 
 int donate(struct thread* receiver, struct thread* donor);
 struct thread* o_g_Donor(struct thread *t);
-bool lessUsingPrioritySema(const struct list_elem *new, const struct list_elem 
+bool lessUsingPrioritySema(const struct list_elem *new, const struct list_elem
 							*old, void *aux UNUSED);
 
 /*  Initializes semaphore SEMA to VALUE.  A semaphore is a
@@ -76,7 +76,7 @@ sema_down(struct semaphore *sema)
 
     ASSERT(sema != NULL);
     ASSERT(!intr_context());
-
+    // Made the list ordered while Chia-Hua drove
     old_level = intr_disable();
     while (sema->value == 0) {
         list_insert_ordered(&sema->waiters, &thread_current()->elem, 
@@ -126,7 +126,7 @@ sema_up(struct semaphore *sema)
     if (!list_empty(&sema->waiters)) 
         thread_unblock(list_entry(list_pop_front(&sema->waiters),
                                 struct thread, elem));
-    //we inserted this 
+    //we inserted this in Connie's session
     sema->value++;
     checkYield();
   
@@ -200,7 +200,7 @@ lock_init(struct lock *lock)
     interrupt handler.  This function may be called with
     interrupts disabled, but interrupts will be turned back on if
     we need to sleep. */
-void
+void      //3 drivers' code fragments were interweaved to write this method 
 lock_acquire(struct lock *lock)
 { 
     int receiverOldPriority;
@@ -220,18 +220,18 @@ lock_acquire(struct lock *lock)
     sema_down(&lock->semaphore);
     // reset
     old_level = intr_disable();
-    if (receiver != NULL) {
+    if (receiver != NULL) { //Beginning of code chunk by Chiahua
         receiver->priority = receiverOldPriority;
     if (receiver->startingPriority>-1) {
         receiver->priority = receiver->startingPriority;      
-     }
+     }                     //End of code chunk by chiahua
         receiver->donor = NULL;
     }
     lock->holder = thread_current();
     intr_set_level(old_level);
 }
 
-int 
+int     //Fragments were written during all 3 driving sessions
 donate(struct thread* receiver, struct thread* donor) 
 {
     //save the old priority 
@@ -245,7 +245,7 @@ donate(struct thread* receiver, struct thread* donor)
     return receiverOldPriority; 
 }
 
-struct thread*
+struct thread*     //Written while Chia-Hua was driving 
 o_g_Donor(struct thread *t) 
 {
     struct thread * current = t;
@@ -306,7 +306,7 @@ struct semaphore_elem
 {
     struct list_elem elem;              /* List element. */
     struct semaphore semaphore;         /* This semaphore. */
-    int priority;
+    int priority;                       /* Priority of Semaphore */
 };
 
 /*  Initializes condition variable COND.  A condition variable
@@ -348,7 +348,7 @@ cond_wait(struct condition *cond, struct lock *lock)
     ASSERT(lock != NULL);
     ASSERT(!intr_context());
     ASSERT(lock_held_by_current_thread(lock));
-  
+    //Made to use ordered list during Connie's driving session
     sema_init(&waiter.semaphore, 0);
     waiter.priority = thread_current()->priority;
     list_insert_ordered(&cond->waiters, &waiter.elem, &lessUsingPrioritySema, 
@@ -358,7 +358,7 @@ cond_wait(struct condition *cond, struct lock *lock)
     lock_acquire(lock);
 }
 
-bool
+bool      //Adopted from Sabrina's comparator
 lessUsingPrioritySema(const struct list_elem *new, const struct list_elem 
                                                 *old,void *aux UNUSED)
 {
@@ -382,8 +382,8 @@ cond_signal(struct condition *cond, struct lock *lock UNUSED)
     ASSERT(lock_held_by_current_thread(lock));
 
     if (!list_empty(&cond->waiters)) {
-        sema_up(&list_entry(list_pop_front(&cond->waiters),struct semaphore_elem, 
-                        elem)->semaphore);
+        sema_up(&list_entry(list_pop_front(&cond->waiters), 
+                        struct semaphore_elem, elem)->semaphore);
         checkYield();
     }
 }

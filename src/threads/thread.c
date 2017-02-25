@@ -236,7 +236,7 @@ thread_block(void)
     be important: if the caller had disabled interrupts itself,
     it may expect that it can atomically unblock a thread and
     update other data. */
-void
+void    //Made this method use ordered list while Connie drove
 thread_unblock(struct thread *t) 
 {
     void *aux = NULL;
@@ -251,9 +251,9 @@ thread_unblock(struct thread *t)
     intr_set_level(old_level);
 }
 
-/*  Returns true if old is greater than new */
-bool lessUsingPriority(const struct list_elem *new, const struct list_elem *old,
-                       void *aux UNUSED){
+/*  Returns true if old is greater than new */ //Written when Sabrina drove
+bool lessUsingPriority(const struct list_elem *new, const struct 
+                       list_elem *old, void *aux UNUSED){
     return list_entry(old, struct thread, elem)->priority 
                 < list_entry(new, struct thread, elem)->priority;
 }
@@ -314,7 +314,7 @@ thread_exit(void)
 
 /*  Yields the CPU.  The current thread is not put to sleep and
     may be scheduled again immediately at the scheduler's whim. */
-void
+void   //Made this method use ordered list during Chia-Hua's driving session
 thread_yield(void) 
 {
     struct thread *cur = thread_current();
@@ -324,7 +324,7 @@ thread_yield(void)
 
     old_level = intr_disable();
     if (cur != idle_thread) 
-        list_insert_ordered(&ready_list, &cur->elem, &lessUsingPriority, NULL);
+        list_insert_ordered(&ready_list, &cur->elem, &lessUsingPriority,NULL);
                 cur->status = THREAD_READY;
   
     schedule();
@@ -338,7 +338,7 @@ void checkYield(void){
     } else {
         intr_yield_on_return();
     }
-}
+}   //Written by Sabrina during her driving session
 
 /*  Invoke function 'func' on all threads, passing along 'aux'.
     This function must be called with interrupts off. */
@@ -357,12 +357,12 @@ thread_foreach(thread_action_func *func, void *aux)
 }
 
 /*  Sets the current thread's priority to NEW_PRIORITY. */
-void
+void  //Donate less written in Chiahua's driving session.
 thread_set_priority(int new_priority) 
 {
     enum intr_level old_level;
     bool possibleYield;
-
+    //Priority donate less part written during Chia-Hua's driving session
     old_level = intr_disable();
     if (thread_current()-> donor != NULL){
         if (thread_current()->priority < new_priority) {
@@ -372,12 +372,12 @@ thread_set_priority(int new_priority)
         }
     } else if (new_priority >=0) {
         thread_current()->priority = new_priority;
-    }
-    possibleYield = lessUsingPriority(list_begin(&ready_list), &running_thread()->elem, NULL);
+    }  //End of priority donate less part during Chia-Hua's session
+    possibleYield=lessUsingPriority(list_begin(&ready_list)
+                                 ,&running_thread()->elem,NULL);
     intr_set_level(old_level);
-    if (possibleYield){
+    if (possibleYield)  // Written during Connie's session
         checkYield();
-    }
 }
 
 /*  Returns the current thread's priority. */
@@ -502,14 +502,14 @@ init_thread(struct thread *t, const char *name, int priority)
     t->status = THREAD_BLOCKED;
     strlcpy(t->name, name, sizeof t->name);
     t->stack =(uint8_t *) t + PGSIZE;
-    t->priority = priority;
+    t->priority = priority;  
     t->magic = THREAD_MAGIC;
-    t->donor = NULL;
+    t->donor = NULL;    //Written during Chiahua's driving session
   
     //our code
-    sema_init(&t->threadSema, 0);
-    t->targetTime = 0; 
-    t->startingPriority = -1;
+    sema_init(&t->threadSema, 0);  //Written in Sabrina's section
+    t->targetTime = 0;           //Written in Sabrina's session
+    t->startingPriority = -1;  //Written in Chia-Hua's session
 
     old_level = intr_disable();
     list_push_back(&all_list, &t->allelem);
@@ -584,7 +584,7 @@ thread_schedule_tail(struct thread *prev)
       pull out the rug under itself. (We don't free
       initial_thread because its memory was not obtained via
       palloc().) */
-    if (prev != NULL && prev->status == THREAD_DYING && prev != initial_thread) {
+    if (prev!=NULL && prev->status == THREAD_DYING && prev!=initial_thread) {
         ASSERT(prev != cur);
         palloc_free_page(prev);
     }

@@ -1,0 +1,37 @@
+    Chia Hua Lu    Sabrina Herrero        Connie Chen    Total
+Totals:    11:10:00    9:24:00            10:17:00    30:51:00
+
+Date    Time Start    Time Stop    Duration    Driver    Chia Hua Lu    Sabrina Herrero    Connie Chen    Notes/Comments            
+2/11    4:30:00 PM       5:57 PM    1:27:00        A            1:27:00                                Looking at timer.c and thread.c, trying to understand what to do            
+        6:01:00 PM    6:09:00 PM    0:08:00        B                        0:08:00                    Initialized git repository            
+        6:16:00 PM    6:59:00 PM    0:43:00        B                        0:43:00                    Brainstorm Solution            
+        6:59:00 PM    7:41:00 PM    0:42:00        A            0:42:00                                Brainstorm Solution            
+        7:50:00 PM    8:49:00 PM    0:59:00        A            0:59:00                                Made a list            
+                                            
+2/12    7:09:00 PM    8:13:00 PM    1:04:00        B                        1:04:00                    
+        8:15:00 PM    9:35:00 PM    1:20:00        C                                        1:20:00                
+2/13    10:12:00 PM  11:56:00 PM    1:44:00        B                        1:44:00                    Implemented list of struct we heard in Alison OH for timer_sleep. Move remove from timer_interr to sleep. Can't figure out sema_init            
+                                            
+2/14    6:40:00 PM    7:30:00 PM    0:50:00        C                                        0:50:00                
+                                            
+2/15    6:13:00 PM    7:07:00 PM    0:54:00        C                                        0:54:00                
+                                            
+2/16    7:05:00 PM    7:28:00 PM    0:23:00        A            0:23:00                                Completed alarm            
+        7:28:00 PM    9:37:00 PM    2:09:00        A            2:09:00                                Thought about less            
+        9:40:00 PM   11:27:00 PM    1:47:00        B                        1:47:00                    Implemented Sorting List            
+       11:28:00 PM   11:53:00 PM    0:25:00        C                                        0:25:00                
+                                            
+2/17    5:38:00 PM    7:33:00 PM    1:55:00        C                                        1:55:00    Did alarm priority. Fail at semaphore priority            
+                                            
+2/18    6:42:00 PM    8:06:00 PM    1:24:00        A            1:24:00                                Worked on PrioritySema            
+        8:07:00 PM    8:55:00 PM    0:48:00        B                        0:48:00                    
+        9:50:00 PM   11:20:00 PM    1:30:00        C                                        1:30:00                
+                                            
+2/18    6:00:00 PM    7:50:00 PM    1:50:00        A            1:50:00                                Figured out Priority Sema problem            
+                                            
+2/20    9:12:00 PM   10:52:00 PM    1:40:00        B                        1:40:00                    
+       10:58:00 PM   11:49:00 PM    0:51:00        C                                        0:51:00    Thought about donation            
+                                            
+2/23    8:04:00 PM    9:34:00 PM    1:30:00        B                        1:30:00                    Did Donate one            
+       10:38:00 PM    1:10:00 AM    2:32:00        C                                        2:32:00                
+2/24    1:11:00 AM    3:27:00 AM    2:16:00        A            2:16:00                                Finalised things. Stylistic changes            

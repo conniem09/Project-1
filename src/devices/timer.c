@@ -94,7 +94,7 @@ timer_elapsed(int64_t then)
 
 /*  Sleeps for approximately TICKS timer ticks.  Interrupts must
     be turned on. */
-void
+void   //Written in Sabrina's session.
 timer_sleep(int64_t ticks) 
 {
     //get current thread
@@ -184,7 +184,7 @@ timer_print_stats(void)
 }
 
 /* Timer interrupt handler. */
-static void
+static void   //Method modified by both Chia-Hua and Sabrina's sessions
 timer_interrupt(struct intr_frame *args UNUSED)
 {
     struct list_elem *i;
